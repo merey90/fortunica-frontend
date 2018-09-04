@@ -13,7 +13,8 @@ class Persons extends Component {
 
   async componentDidMount(){
     try {
-      const urlPath = `http://localhost:3000/${this.props.type}`;
+      const clients = !!this.props.user ? '/user/'+this.props.user : '';
+      const urlPath = `http://localhost:3000/${this.props.type}${clients}`;
       const res = await axios.get(urlPath);
       if(!!res.data && res.data.length > 0){
         this.setState({

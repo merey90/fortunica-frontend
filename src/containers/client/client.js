@@ -12,7 +12,6 @@ class Client extends Component {
     this.state = {
       client:{},
       user:{},
-      conversation: {},
     }
 
     this.handleSubmitLogin = this.handleSubmitLogin.bind(this);
@@ -68,9 +67,6 @@ class Client extends Component {
 
   render() {
     let page;
-    if(!this.state.conversation._id){
-
-    }
     if(!this.state.client._id)
       page = <ClientLogin
         handleSubmitRegister={this.handleSubmitRegister}

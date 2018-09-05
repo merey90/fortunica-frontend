@@ -56,7 +56,7 @@ class Conversation extends Component {
         this.setState({
           conversations: res.data
         });
-        this.handleConversationClick(this.state.conversations[0]);
+        this.handleConversationClick(this.state.conversations[0], 0);
       } else{
         console.log(res);
       }
@@ -65,11 +65,18 @@ class Conversation extends Component {
     }
   }
 
-  handleConversationClick(conversation){
+  handleConversationClick(conversation, index){
     this.setState({
       conversation,
       showMessageForm: false
     });
+    if(conversation.hasNew){
+      const conversations = this.state.conversations;
+      conversations[index].hasNew = false;
+      this.setState({
+        conversations
+      });
+    }
   }
 
   async handleSubmit(event) {
@@ -109,8 +116,11 @@ class Conversation extends Component {
   }
 
   render() {
-    const listConversations = this.state.conversations.map(conversation =>
-      <li className={conversation.hasNew? 'green' : ''} key={conversation._id} onClick={() => this.handleConversationClick(conversation)}>
+    const listConversations = this.state.conversations.map((conversation, i) =>
+      <li className={conversation.hasNew? 'green' : ''}
+          key={conversation._id}
+          onClick={() => this.handleConversationClick(conversation, i)}
+      >
         {conversation.title}
       </li>
     );
@@ -126,7 +136,9 @@ class Conversation extends Component {
         <hr/>
         <div className="messaging-container">
           {!!this.state.conversation._id &&
-            <Dialog hasAnswer={this.handleHasAnswer} conversation={this.state.conversation._id}/>
+            <Dialog hasAnswer={this.handleHasAnswer}
+              conversation={this.state.conversation._id}
+              forClient={this.props.forClient}/>
           }
           {(this.state.showMessageForm || (!this.state.hasAnswer && !this.props.forClient)) &&
             <MessageForm

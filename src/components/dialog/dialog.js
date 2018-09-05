@@ -23,7 +23,7 @@ class Dialog extends Component {
 
   async getDialog(conversation){
     try {
-      const urlPath = `http://localhost:3000/conversations/${conversation}`;
+      const urlPath = `http://localhost:3000/conversations/${conversation}/${this.props.forClient}`;
       const res = await axios.get(urlPath);
       if(!!res.data){
         this.setState({

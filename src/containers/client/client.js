@@ -32,7 +32,7 @@ class Client extends Component {
     });
 
     subscribeNotifications((notification) => {
-      alert( Object.toString(notification) );
+      alert( `${notification.message}. From ${notification.person} in conversation: ${notification.conversation}`);
     });
   }
 

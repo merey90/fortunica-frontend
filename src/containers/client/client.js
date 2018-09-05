@@ -5,6 +5,13 @@ import ClientLogin from './../../components/client-login/client-login';
 import Persons from './../../components/persons/persons';
 import Conversation from './../conversation/conversation';
 
+import { joinSocket,
+  leaveSocket,
+  subscribeSocketErrors,
+  unsubscribeSocketErrors, 
+  unsubscribeNotifications, 
+  subscribeNotifications } from '../../services/conversations.socket';
+
 import './client.css';
 class Client extends Component {
   constructor(props){
@@ -19,16 +26,31 @@ class Client extends Component {
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleUserClick = this.handleUserClick.bind(this);
+
+    subscribeSocketErrors((error) => {
+      console.log('subscribeSocketErrors: ', error);
+    });
+
+    subscribeNotifications((notification) => {
+      alert( Object.toString(notification) );
+    });
+  }
+
+  componentWillUnmount(){
+    unsubscribeSocketErrors();
+    unsubscribeNotifications();
+    if(!!this.state.client._id)
+      leaveSocket(this.state.client._id);
   }
 
   async handleSubmitLogin(event) {
     event.preventDefault();
     try {
       const res = await axios.get(`http://localhost:3000/clients/${this.state.client.name}`);
-      if(!!res.data.client)
+      if(!!res.data.client){
         this.setState({ client: res.data.client });
-      else
-        console.log('not found');
+        joinSocket(res.data.client._id);
+      } else console.log('not found');
     } catch (error) {
       console.log(error);
     }

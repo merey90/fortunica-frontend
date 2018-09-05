@@ -3,6 +3,10 @@ import axios from 'axios';
 
 import Dialog from './../../components/dialog/dialog';
 import MessageForm from '../../components/message-form/message-form';
+import { postAnswer,
+         postQuestion,
+         subscribeToConversations,
+         unsubscribeToConversations } from '../../services/conversations.socket';
 
 import './conversation.css';
 class Conversation extends Component {
@@ -24,11 +28,29 @@ class Conversation extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleCompose = this.handleCompose.bind(this);
     this.handleHasAnswer = this.handleHasAnswer.bind(this);
+
+    this.fetchConversations = this.fetchConversations.bind(this);
   }
 
-  async componentDidMount(){
+  componentDidMount(){
+    this.fetchConversations(this.props.user._id, this.props.client._id, this.props.forClient);
+
+    subscribeToConversations((conversations) => {
+      if(!!conversations && conversations.length > 0){
+        this.setState({
+          conversations
+        });
+      }
+    });
+  }
+
+  componentWillUnmount(){
+    unsubscribeToConversations();
+  }
+
+  async fetchConversations(user, client, forClient){
+    const urlPath = `http://localhost:3000/conversations/${user}/${client}/${forClient}`;
     try {
-      const urlPath = `http://localhost:3000/conversations/${this.props.user._id}/${this.props.client._id}/${this.props.forClient}`;
       const res = await axios.get(urlPath);
       if(!!res.data && res.data.length > 0){
         this.setState({
@@ -52,39 +74,11 @@ class Conversation extends Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    const type = this.props.forClient ? 'questions':'answers';
     const message = this.state.message;
     // If this is answer then attach conversation id
     if(!this.props.forClient) message.conversation = this.state.conversation._id;
-    try {
-      const res = await axios.post(`http://localhost:3000/${type}/`, message);
-      
 
-      if(!!res.data.conversation){
-        this.setState({
-          message: {},
-          conversations: [
-            res.data.conversation,
-            ...this.state.conversations
-          ]
-        });
-        this.handleConversationClick(res.data.conversation);
-      } else if(!!res.data.answer){
-        this.setState({
-          message: {}
-        });
-        const conv = this.state.conversation;
-        // Refresh Dialog Box
-        /**
-         * TODO: Disgusting workaround, need to refactor
-         */
-        this.handleConversationClick({});
-        this.handleConversationClick(conv);
-      } else
-        console.log('not found');
-    } catch (error) {
-      console.log(error);
-    }
+    this.props.forClient ? postQuestion(message) : postAnswer(message);
   }
 
   handleInputChange(event) {
@@ -116,21 +110,19 @@ class Conversation extends Component {
 
   render() {
     const listConversations = this.state.conversations.map(conversation =>
-      <li key={conversation._id} onClick={() => this.handleConversationClick(conversation)}>
+      <li className={conversation.hasNew? 'green' : ''} key={conversation._id} onClick={() => this.handleConversationClick(conversation)}>
         {conversation.title}
       </li>
     );
 
     return (
       <div className="conversation">
-        <div className="conversations-list">
-          <ul>
-            {this.props.forClient &&
-              <li><button onClick={this.handleCompose}>Componse new</button></li>
-            }
-            {listConversations}
-          </ul>
-        </div>
+        <ul className="conversations-list">
+          {this.props.forClient &&
+            <li><button onClick={this.handleCompose}>Componse new</button></li>
+          }
+          {listConversations}
+        </ul>
         <hr/>
         <div className="messaging-container">
           {!!this.state.conversation._id &&

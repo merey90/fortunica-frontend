@@ -4,6 +4,13 @@ import axios from 'axios';
 import Persons from './../../components/persons/persons';
 import Conversation from './../conversation/conversation';
 
+import { joinSocket,
+  leaveSocket,
+  subscribeSocketErrors,
+  unsubscribeSocketErrors, 
+  unsubscribeNotifications, 
+  subscribeNotifications } from '../../services/conversations.socket';
+
 import './user.css';
 class User extends Component {
   constructor(props){
@@ -16,6 +23,20 @@ class User extends Component {
     this.handleSubmitUser = this.handleSubmitUser.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleClientClick = this.handleClientClick.bind(this);
+
+    subscribeSocketErrors((error) => {
+      console.log('subscribeSocketErrors: ', error);
+    });
+    subscribeNotifications((notification) => {
+      alert( Object.toString(notification) );
+    });
+  }
+
+  componentWillUnmount(){
+    unsubscribeSocketErrors();
+    unsubscribeNotifications();
+    if(!!this.state.user._id)
+      leaveSocket(this.state.user._id);
   }
 
   handleNameChange(event) {
@@ -34,10 +55,10 @@ class User extends Component {
     }
     try {
       const res = await axios.get(`http://localhost:3000/users/${this.state.user.name}`);
-      if(!!res.data.user)
+      if(!!res.data.user){
         this.setState({ user: res.data.user });
-      else
-        console.log('not found');
+        joinSocket(res.data.user._id);
+      } else console.log('not found');
     } catch (error) {
       console.log(error);
     }

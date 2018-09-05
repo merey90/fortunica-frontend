@@ -28,6 +28,10 @@ class User extends Component {
 
   async handleSubmitUser(event) {
     event.preventDefault();
+    if(!this.state.user.name){
+      console.log('Error: Fill in user name');
+      return;
+    }
     try {
       const res = await axios.get(`http://localhost:3000/users/${this.state.user.name}`);
       if(!!res.data.user)

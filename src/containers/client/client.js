@@ -36,6 +36,10 @@ class Client extends Component {
 
   async handleSubmitRegister(event) {
     event.preventDefault();
+    if(!this.state.client.name || !this.state.client.zodiac){
+      console.log('Error: Fill in corresponding inputs');
+      return;
+    }
     try {
       const res = await axios.post(`http://localhost:3000/clients/`, this.state.client);
       if(!!res.data.client)

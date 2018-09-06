@@ -1,5 +1,9 @@
 import React from 'react';
 
+import Button from '@material-ui/core/Button';
+import FormControl from '@material-ui/core/FormControl';
+import TextField from '@material-ui/core/TextField';
+
 import './message-form.css';
 const MessageForm = (props) => {
   return (
@@ -7,18 +11,33 @@ const MessageForm = (props) => {
         <h3>For {props.name}</h3>
         <br/>
         {props.type === 'question' &&
-          <input name="title"
-            type="text" placeholder="Type the question Title"
-            value={!!props.message.title ? props.message.title : '' }
-            onChange={props.handleInputChange}/>
+          <FormControl fullWidth>
+            <TextField
+                name="title"
+                label="Title"
+                onChange={props.handleInputChange}
+                value={!!props.message.title ? props.message.title : '' }
+                margin="normal"
+              />
+          </FormControl>
         }
-        <br/>
-        <textarea name="content"
-          onChange={props.handleInputChange}
-          value={!!props.message.content ? props.message.content : ''}
-          type="text" placeholder={"Type in your "+props.type}/>
-        <button type="submit">Send</button>
-        <br/>
+        <FormControl fullWidth>
+          <TextField multiline={true}
+              rows={3}
+              name="content"
+              label="Content"
+              placeholder="Type in message content"
+              onChange={props.handleInputChange}
+              value={!!props.message.content ? props.message.content : ''}
+              margin="normal"
+            />
+        </FormControl>
+        <FormControl fullWidth>
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit">Send</Button>
+        </FormControl>
       </form>
   );
 }

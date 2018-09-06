@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import moment from 'moment';
+
+import Grid from '@material-ui/core/Grid';
+import Slide from '@material-ui/core/Slide';
+import Paper from '@material-ui/core/Paper';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Button from '@material-ui/core/Button';
 
 import Dialog from './../../components/dialog/dialog';
 import MessageForm from '../../components/message-form/message-form';
@@ -40,6 +49,7 @@ class Conversation extends Component {
         this.setState({
           conversations
         });
+        this.handleConversationClick(conversations[0], 0);
       }
     });
   }
@@ -68,6 +78,7 @@ class Conversation extends Component {
   handleConversationClick(conversation, index){
     this.setState({
       conversation,
+      selectedCoversation: index,
       showMessageForm: false
     });
     if(conversation.hasNew){
@@ -116,39 +127,74 @@ class Conversation extends Component {
   }
 
   render() {
-    const listConversations = this.state.conversations.map((conversation, i) =>
-      <li className={conversation.hasNew? 'green' : ''}
-          key={conversation._id}
-          onClick={() => this.handleConversationClick(conversation, i)}
-      >
-        {conversation.title}
-      </li>
-    );
+    const listConversations = this.state.conversations.map((conversation, i) => {
+      let newClass = conversation.hasNew ? 'green' : '';
+      return (
+        <ListItem button className={'conversations-item '+newClass}
+            key={conversation._id}
+            selected={this.state.selectedCoversation === i}
+            onClick={() => this.handleConversationClick(conversation, i)}
+        >
+          <ListItemText
+            primary={conversation.title}
+            secondary={moment(conversation.createdAt).format('LLL')}
+          />
+        </ListItem>
+      )
+    });
 
     return (
       <div className="conversation">
-        <ul className="conversations-list">
-          {this.props.forClient &&
-            <li><button onClick={this.handleCompose}>Componse new</button></li>
-          }
-          {listConversations}
-        </ul>
-        <hr/>
-        <div className="messaging-container">
-          {!!this.state.conversation._id &&
-            <Dialog hasAnswer={this.handleHasAnswer}
-              conversation={this.state.conversation._id}
-              forClient={this.props.forClient}/>
-          }
-          {(this.state.showMessageForm || (!this.state.hasAnswer && !this.props.forClient)) &&
-            <MessageForm
-              type={this.props.forClient ? 'question' : 'answer' }
-              name={this.props.forClient ? this.props.user.name : this.props.client.name }
-              message={this.state.message}
-              handleSubmit={this.handleSubmit}
-              handleInputChange={this.handleInputChange}/>
-          }
-        </div>
+        <Grid container
+          direction="row"
+          justify="center"
+          alignItems="stretch"
+          spacing={16}>
+            <Grid item xs={4}>
+              <Paper className="default-padding full-height" elevation={1}>
+                {this.props.forClient &&
+                  <Button variant="contained"
+                    color="primary"
+                    onClick={this.handleCompose}>Componse new</Button>
+                }
+                <List dense={true} className="conversations-list">
+                  {listConversations}
+                </List>
+              </Paper>
+            </Grid>
+            <Grid item xs={8}>
+              <Grid container
+                direction="column"
+                justify="center"
+                alignItems="stretch"
+                spacing={16}>
+                <Slide 
+                  direction="left"
+                  in={!!this.state.conversation._id}
+                  mountOnEnter unmountOnExit>
+                  <Grid item>
+                    <Dialog hasAnswer={this.handleHasAnswer}
+                      conversation={this.state.conversation._id}
+                      forClient={this.props.forClient}
+                      userName={this.props.user.name}
+                      clientName={this.props.client.name}/>
+                  </Grid>
+                </Slide>
+                <Grid item>
+                  <Slide direction="up" in={this.state.showMessageForm || (!this.state.hasAnswer && !this.props.forClient)} mountOnEnter unmountOnExit>
+                    <Paper className="default-padding full-height" elevation={1}>
+                      <MessageForm
+                        type={this.props.forClient ? 'question' : 'answer' }
+                        name={this.props.forClient ? this.props.user.name : this.props.client.name }
+                        message={this.state.message}
+                        handleSubmit={this.handleSubmit}
+                        handleInputChange={this.handleInputChange}/>
+                    </Paper>
+                  </Slide>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
       </div>
     );
   }

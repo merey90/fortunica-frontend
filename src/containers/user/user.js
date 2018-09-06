@@ -1,6 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
+import Button from '@material-ui/core/Button';
+import FormControl from '@material-ui/core/FormControl';
+import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+
 import Persons from './../../components/persons/persons';
 import Conversation from './../conversation/conversation';
 
@@ -18,17 +26,21 @@ class User extends Component {
     this.state = {
       client:{},
       user:{},
+      notification:{},
     }
 
     this.handleSubmitUser = this.handleSubmitUser.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleClientClick = this.handleClientClick.bind(this);
+    this.handleCloseNotification = this.handleCloseNotification.bind(this);
 
     subscribeSocketErrors((error) => {
       console.log('subscribeSocketErrors: ', error);
     });
     subscribeNotifications((notification) => {
-      alert( Object.toString(notification) );
+      this.setState({
+        notification
+      });
     });
   }
 
@@ -70,6 +82,12 @@ class User extends Component {
     });
   }
 
+  handleCloseNotification(){
+    this.setState({
+      notification: {}
+    });
+  }
+
   render() {
     const userForm = this.renderUserForm();
     let page;
@@ -87,18 +105,58 @@ class User extends Component {
     return (
       <div className="user">
         {page}
+        {!!this.state.notification.message &&
+          <Snackbar
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            open={!!this.state.notification.message}
+            autoHideDuration={15000}
+            onClose={this.handleCloseNotification}
+            message={<span >{
+              `${this.state.notification.message}. 
+              From ${this.state.notification.person}
+              in conversation: 
+              ${this.state.notification.conversation}`
+            }</span>}
+            action={
+              <IconButton
+                key="close"
+                aria-label="Close"
+                color="inherit"
+                onClick={this.handleCloseNotification}
+              >
+                <Icon>close</Icon>
+              </IconButton>
+            }
+          />
+        }
       </div>
     );
   }
 
   renderUserForm(){
     return(
-      <form className='login' onSubmit={this.handleSubmitUser}>
-        <input name="name"
-          onChange={this.handleNameChange}
-          type="text" placeholder="Enter your name"/>
-        <button type="submit">Sign In/Up</button>
-      </form>
+      <Paper className="user-login default-padding full-height" elevation={1}>
+        <form onSubmit={this.handleSubmitUser}>
+          <FormControl fullWidth>
+            <TextField
+                name="name"
+                label="Name"
+                onChange={this.handleNameChange}
+                margin="normal"
+              />
+          </FormControl>
+          <FormControl fullWidth>
+            <Button
+              variant="contained"
+              size="large"
+              color="primary"
+              type="submit">Sign In/Up</Button>
+          </FormControl>
+        </form>
+      </Paper>
     );
   }
 }

@@ -1,5 +1,12 @@
 .conversations-list{
-  .green{
-    color: green;
+  .conversations-item{
+    -webkit-transition: background-color 1000ms linear;
+    -ms-transition: background-color 1000ms linear;
+    transition: background-color 1000ms linear;
+    &.green{
+      background-color: #62f162;
+      color: gray;
+    }
   }
+  
 }

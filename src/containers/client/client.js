@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+
 import ClientLogin from './../../components/client-login/client-login';
 import Persons from './../../components/persons/persons';
 import Conversation from './../conversation/conversation';
@@ -19,6 +23,7 @@ class Client extends Component {
     this.state = {
       client:{},
       user:{},
+      notification: {},
     }
 
     this.handleSubmitLogin = this.handleSubmitLogin.bind(this);
@@ -26,13 +31,16 @@ class Client extends Component {
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleUserClick = this.handleUserClick.bind(this);
+    this.handleCloseNotification = this.handleCloseNotification.bind(this);
 
     subscribeSocketErrors((error) => {
       console.log('subscribeSocketErrors: ', error);
     });
 
     subscribeNotifications((notification) => {
-      alert( `${notification.message}. From ${notification.person} in conversation: ${notification.conversation}`);
+      this.setState({
+        notification
+      });
     });
   }
 
@@ -91,6 +99,12 @@ class Client extends Component {
     });
   }
 
+  handleCloseNotification(){
+    this.setState({
+      notification: {}
+    });
+  }
+
   render() {
     let page;
     if(!this.state.client._id)
@@ -109,6 +123,33 @@ class Client extends Component {
     return(
       <div>
         {page}
+        {!!this.state.notification.message &&
+          <Snackbar
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            open={!!this.state.notification.message}
+            autoHideDuration={15000}
+            onClose={this.handleCloseNotification}
+            message={<span >{
+              `${this.state.notification.message}. 
+              From ${this.state.notification.person}
+              in conversation: 
+              ${this.state.notification.conversation}`
+            }</span>}
+            action={
+              <IconButton
+                key="close"
+                aria-label="Close"
+                color="inherit"
+                onClick={this.handleCloseNotification}
+              >
+                <Icon>close</Icon>
+              </IconButton>
+            }
+          />
+        }
       </div>
     )
   }

@@ -11,7 +11,9 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title">Fortunica</h1>
         </header>
-        <AppRoute/>
+        <main>
+          <AppRoute/>
+        </main>
       </div>
     );
   }

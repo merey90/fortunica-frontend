@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
+import Paper from '@material-ui/core/Paper';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+
 import './persons.css';
 
 class Persons extends Component {
@@ -31,14 +35,14 @@ class Persons extends Component {
 
   render() {
     const listPersons = this.state.persons.map(person =>
-      <li key={person._id} onClick={() => this.props.onClick(person)}>
+      <ListItem button key={person._id} onClick={() => this.props.onClick(person)}>
         {person.name}
-      </li>
+      </ListItem>
     );
     return (
-      <div className="persons">
-        <ul>{listPersons}</ul>
-      </div>
+      <Paper className="persons default-padding full-height" elevation={1}>
+        <List>{listPersons}</List>
+      </Paper>
     );
   }
 }

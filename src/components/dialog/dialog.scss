@@ -1,0 +1,23 @@
+.dialog{
+  display: flex;
+  flex-direction: column;
+  .dialog-info{
+    color:#999;
+  }
+
+  .dialog-question{
+    align-self: flex-start;
+    margin-bottom: 16px;
+    max-width: 300px;
+    .dialog-content{
+      background-color: #c0e0de;
+    }
+  }
+  .dialog-answer{
+    align-self: flex-end;
+    max-width: 300px;
+    .dialog-content{
+      background-color: #c195b9;
+    }
+  }
+}
